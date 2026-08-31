@@ -1,7 +1,7 @@
 //user Schema
 
 import mongoose from "mongoose";
-import validator from "validatore";
+import validator from "validator";
 import bcrypt from "bcrypt";
 import crypto from "node:crypto";
 
@@ -35,8 +35,59 @@ select:false
 passwordConfirm:{
    type:string,
    required:[true,"Please confirm your password"],
+   validate:{
+      validator:function(el){
+         return el ===this.password
+      },
+      message:"Passwords are not the same !"
+   }
+},
+phoneNumber:{
+   type:string,
+   required:true,
+   unique:true,
+   trim:true
+},
+
+role:{
+   type:string,
+   enum:["user","admin"],
+   default:"user"
+},
+avatar:{
+   url:{ type:string},
+   public_id:{type:string}
+},
+passwordChangedAt:{
+   type:Date
+},
+passwordResetToken:{
+type:string,
+select:false,
+index:true
+},
+
+passwordResetExpires:{
+   type:string,
+   select:false,
+},
+
+
+},
+{
+   timestamps:true
 }
 
+)
 
+//settingsto not pass in response from server
+userSchema.set("toJSON",{
+   transform:function(doc,ret){
+delete ret.password;
+delete ret.passwordConfirm;
+delete ret.passwordChangedAt;
+delete ret.passwordResetExpires;
+delete ret.__v;
+return ret;
 
-})
+   }})
